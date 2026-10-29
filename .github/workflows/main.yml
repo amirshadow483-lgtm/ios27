@@ -1,0 +1,43 @@
+
+name: Build Glass Home APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Build APK
+        run: |
+          if [ -f ./gradlew ]; then
+            chmod +x ./gradlew
+            ./gradlew assembleDebug
+          elif [ -f ./gradlew.bat ]; then
+            echo "Gradle wrapper found with Windows script only"
+            exit 1
+          else
+            echo "ERROR: Gradle wrapper not found in repository root"
+            exit 1
+          fi
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Glass-Home-APK
+          path: '**/build/outputs/apk/**/*.apk'
+          if-no-files-found: error
+          
